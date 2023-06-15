@@ -1,0 +1,44 @@
+extractors:
+  vpk:
+    filters:
+      - "*_dir.vpk"
+processors:
+  vtables:
+    filters:
+    - "*.dylib"
+  strings:
+    filters:
+    - "*.dylib"
+    - "hl2_osx"
+    - "srcds_linux"
+  symbols:
+    filters:
+    - "*.dylib"
+    - "hl2_osx"
+    - "srcds_linux"
+  netvars:
+    filters:
+      - "tf/bin/server_srv.so"
+  protobufs:
+    filters:
+      - "*.dylib"
+  bsp:
+    filters:
+      - "*.bsp"
+  vpk:
+    filters:
+      - "*_dir.vpk"
+  copy:
+    filters:
+      - "*.cfg"
+      - "*.txt"
+      - "*.res"
+      - "*.rc"
+      - "*.vdf"
+      - "*.pop"
+  ice:
+    filters:
+    - "*.ctx"
+  binexport:
+    filters:
+      - "*.so"
