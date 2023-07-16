@@ -20,7 +20,7 @@ def process_dir(input_path: Path, output_path: Path):
     instantiated_processors: list[Processor] = []
 
     for proc in PROCESSORS:
-        proc = proc(output_root)
+        proc = proc(output_root, CONFIG["processors"][proc.name])
 
         proc.pre_process()
         instantiated_processors.append(proc)
@@ -29,7 +29,7 @@ def process_dir(input_path: Path, output_path: Path):
         for proc in instantiated_processors:
             path_to_match = file_info.path.relative_to(file_info.input_root).as_posix()
 
-            pats = CONFIG["processors"][proc.name]["filters"]
+            pats = proc.config["filters"]
             for pat in pats:
                 if fnmatchcase(path_to_match, pat):
                     # print(path_to_match, pat, proc.name)
@@ -55,4 +55,3 @@ def process_dir(input_path: Path, output_path: Path):
         print(proc.artifact_mappings)
 
 process_dir(Path("tf2"), Path("out"))
-process_dir(Path("tf2_prev"), Path("out2"))

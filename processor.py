@@ -7,17 +7,16 @@ import shutil
 import bsp_tool
 import vpk
 
-import ctypes
-from binaryninja import open_view
-
 class Processor:
     name: str
 
     artifact_mappings: dict[Path, list[Path]]
+    config: dict[str, str]
 
-    def __init__(self, output_root: Path):
+    def __init__(self, output_root: Path, config: dict[str, str]):
         self.output_root = output_root
         self.artifact_mappings = {}
+        self.config = config
 
     # Public interface to process_file
     def run_processor(self, file: File):
@@ -74,7 +73,7 @@ class VtableProcessor(Processor):
     name = "vtables"
 
     def process_file(self, file: File):
-        self.run_command_for_file("./vtable_dumper", file)
+        self.run_command_for_file(self.config["bin_path"], file)
 
 
 class StringProcessor(Processor):
@@ -116,7 +115,7 @@ class ProtobufProcessor(Processor):
     def process_file(self, file: File):
         out_path = self.protobuf_dir.joinpath(file.path.stem)
         proc = subprocess.run(
-            ["./ProtobufDumper", file.obtain_real_file_path(), out_path],
+            [self.config["bin_path"], file.obtain_real_file_path(), out_path],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
@@ -196,36 +195,40 @@ class IceProcessor(Processor):
     name = "ice"
 
     def process_file(self, file: File):
-        self.run_command_for_file(["./vice", "-d", "-k" ,"E2NcUkG2"], file)
+        self.run_command_for_file([self.config["bin_path"], "-d", "-k", self.config["ice_key"]], file)
 
-class BinexportProcessor(Processor):
-    name = "binexport"
-    binexport_mod = ctypes.CDLL("binexport12_binaryninja.so")
-
-    def process_file(self, file: File):
-
-        options = { "analysis.mode": "basic" } # Is this enough?
-        with open_view(file.obtain_real_file_path().as_posix(), options = options) as view:
-            # TODO: Merge with copy processor code & create_output_file_for
-            path = file.path
-            final_dir = self.output_root.joinpath(
-                path.parent.relative_to(file.input_root)
-            )
-            final_dir.mkdir(parents=True, exist_ok=True)
-            out_path = final_dir.joinpath(f"{file.path.stem}.BinExport")
-
-            self.add_artifact(file, out_path)
-            self.binexport_mod.BEExportFile(out_path.as_posix().encode("ascii"), view.handle)
+# Needs binja to work
+# import ctypes
+# from binaryninja import open_view
+#
+# class BinexportProcessor(Processor):
+#     name = "binexport"
+#     binexport_mod = ctypes.CDLL("binexport12_binaryninja.so")
+#
+#     def process_file(self, file: File):
+#
+#         options = { "analysis.mode": "basic" } # Is this enough?
+#         with open_view(file.obtain_real_file_path().as_posix(), options = options) as view:
+#             # TODO: Merge with copy processor code & create_output_file_for
+#             path = file.path
+#             final_dir = self.output_root.joinpath(
+#                 path.parent.relative_to(file.input_root)
+#             )
+#             final_dir.mkdir(parents=True, exist_ok=True)
+#             out_path = final_dir.joinpath(f"{file.path.stem}.BinExport")
+#
+#             self.add_artifact(file, out_path)
+#             self.binexport_mod.BEExportFile(out_path.as_posix().encode("ascii"), view.handle)
 
 PROCESSORS: list[typing.Type[Processor]] = [
-    # CopyProcessor,
+    CopyProcessor,
     # NetvarProcessor,
-    # VtableProcessor,
-    # StringProcessor,
-    # SymbolsProcessor,
-    # ProtobufProcessor,
-    # BspProcessor,
-    # VpkProcessor,
-    # IceProcessor,
-    BinexportProcessor,
+    VtableProcessor,
+    StringProcessor,
+    SymbolsProcessor,
+    ProtobufProcessor,
+    BspProcessor,
+    VpkProcessor,
+    IceProcessor,
+    # BinexportProcessor,
 ]

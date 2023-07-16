@@ -4,6 +4,7 @@ extractors:
       - "*_dir.vpk"
 processors:
   vtables:
+    bin_path: ./bin/vtable_dumper
     filters:
     - "*.dylib"
   strings:
@@ -20,6 +21,7 @@ processors:
     filters:
       - "tf/bin/server_srv.so"
   protobufs:
+    bin_path: "./bin/ProtobufDumper"
     filters:
       - "*.dylib"
   bsp:
@@ -37,8 +39,10 @@ processors:
       - "*.vdf"
       - "*.pop"
   ice:
+    bin_path: "./bin/vice"
+    ice_key: "E2NcUkG2"
     filters:
     - "*.ctx"
-  binexport:
-    filters:
-      - "*.so"
+  # binexport:
+  #   filters:
+  #     - "*.so"
