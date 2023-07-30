@@ -101,7 +101,20 @@ class NetvarProcessor(Processor):
             "LD_LIBRARY_PATH": f"{path.parent}:{path.parent.parent.parent.joinpath('bin')}"
         }
 
-        self.run_command_for_file("./nvdumper", file, env=env)
+        self.run_command_for_file(self.config["bin_path"], file, env=env)
+
+class ConvarProcessor(Processor):
+    name = "convars"
+
+    def process_file(self, file: File):
+        assert(file.is_real)
+
+        path = file.path
+        env = {
+            "LD_LIBRARY_PATH": f"{path.parent}:{path.parent.parent.parent.joinpath('bin')}"
+        }
+
+        self.run_command_for_file(self.config["bin_path"], file, env=env)
 
 
 class ProtobufProcessor(Processor):
@@ -197,7 +210,7 @@ class IceProcessor(Processor):
     def process_file(self, file: File):
         self.run_command_for_file([self.config["bin_path"], "-d", "-k", self.config["ice_key"]], file)
 
-# Needs binja to work
+# Needs binja to work, and the analysis is non-deterministic currently anyways
 # import ctypes
 # from binaryninja import open_view
 #
@@ -223,6 +236,7 @@ class IceProcessor(Processor):
 PROCESSORS: list[typing.Type[Processor]] = [
     CopyProcessor,
     # NetvarProcessor,
+    ConvarProcessor,
     VtableProcessor,
     StringProcessor,
     SymbolsProcessor,

@@ -18,8 +18,13 @@ processors:
     - "hl2_osx"
     - "srcds_linux"
   netvars:
+    bin_path: ./bin/nvdumper
     filters:
       - "tf/bin/server_srv.so"
+  convars:
+    bin_path: ./bin/cvdumper
+    filters:
+      - "*.so"
   protobufs:
     bin_path: "./bin/ProtobufDumper"
     filters:

@@ -51,7 +51,7 @@ def process_dir(input_path: Path, output_path: Path):
                         for f in ex.get_files(file_info):
                             run_processors_on_file(f)
 
-    for proc in instantiated_processors:
-        print(proc.artifact_mappings)
+    # for proc in instantiated_processors:
+    #     print(proc.artifact_mappings)
 
 process_dir(Path("tf2"), Path("out"))
