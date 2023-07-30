@@ -9,7 +9,7 @@ processors:
     - "*.dylib"
   strings:
     filters:
-    - "*.dylib"
+    - "*.so"
     - "hl2_osx"
     - "srcds_linux"
   symbols:
@@ -28,7 +28,7 @@ processors:
   protobufs:
     bin_path: "./bin/ProtobufDumper"
     filters:
-      - "*.dylib"
+      - "*.so"
   bsp:
     filters:
       - "*.bsp"

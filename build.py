@@ -8,8 +8,11 @@ import os
 import yaml
 
 CONFIG = {}
-with open("config.yaml", "rb") as fd:
-    CONFIG = yaml.safe_load(fd)
+
+def load_config(path: Path):
+    global CONFIG
+    with open(path, "rb") as fd:
+        CONFIG = yaml.safe_load(fd)
 
 def process_dir(input_path: Path, output_path: Path):
     output_root = output_path.absolute()
@@ -53,5 +56,3 @@ def process_dir(input_path: Path, output_path: Path):
 
     # for proc in instantiated_processors:
     #     print(proc.artifact_mappings)
-
-process_dir(Path("tf2"), Path("out"))
