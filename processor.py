@@ -235,7 +235,7 @@ class IceProcessor(Processor):
 
 PROCESSORS: list[typing.Type[Processor]] = [
     CopyProcessor,
-    # NetvarProcessor,
+    NetvarProcessor,
     ConvarProcessor,
     VtableProcessor,
     StringProcessor,

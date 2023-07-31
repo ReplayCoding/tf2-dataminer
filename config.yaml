@@ -9,26 +9,26 @@ processors:
     - "*.dylib"
   strings:
     filters:
-    - "*.so"
+    - "*.dylib"
     - "hl2_osx"
-    - "srcds_linux"
+    # - "srcds_linux"
   symbols:
     filters:
     - "*.dylib"
     - "hl2_osx"
-    - "srcds_linux"
-  netvars:
-    bin_path: ./bin/nvdumper
-    filters:
-      - "tf/bin/server_srv.so"
-  convars:
-    bin_path: ./bin/cvdumper
-    filters:
-      - "*.so"
+    # - "srcds_linux"
+  # netvars:
+  #   bin_path: ./bin/nvdumper
+  #   filters:
+  #     - "tf/bin/server_srv.so"
+  # convars:
+  #   bin_path: ./bin/cvdumper
+  #   filters:
+  #     - "*.so"
   protobufs:
     bin_path: "./bin/ProtobufDumper"
     filters:
-      - "*.so"
+      - "*.dylib"
   bsp:
     filters:
       - "*.bsp"

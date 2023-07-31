@@ -23,6 +23,9 @@ def process_dir(input_path: Path, output_path: Path):
     instantiated_processors: list[Processor] = []
 
     for proc in PROCESSORS:
+        if not (proc.name in CONFIG["processors"]):
+            continue
+
         proc = proc(output_root, CONFIG["processors"][proc.name])
 
         proc.pre_process()
