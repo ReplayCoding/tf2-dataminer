@@ -3,10 +3,10 @@ extractors:
     filters:
       - "*_dir.vpk"
 processors:
-  vtables:
-    bin_path: ./bin/vtable_dumper
-    filters:
-    - "*.dylib"
+  # vtables:
+  #   bin_path: ./bin/vtable_dumper
+  #   filters:
+  #   - "*.dylib"
   strings:
     filters:
     - "*.dylib"
@@ -21,14 +21,14 @@ processors:
   #   bin_path: ./bin/nvdumper
   #   filters:
   #     - "tf/bin/server_srv.so"
-  # convars:
-  #   bin_path: ./bin/cvdumper
-  #   filters:
-  #     - "*.so"
-  protobufs:
-    bin_path: "./bin/ProtobufDumper"
+  convars:
+    bin_path: ./bin/cvdumper
     filters:
-      - "*.dylib"
+      - "*.so"
+  # protobufs:
+  #   bin_path: "./bin/ProtobufDumper"
+  #   filters:
+  #     - "*.dylib"
   bsp:
     filters:
       - "*.bsp"
@@ -43,8 +43,9 @@ processors:
       - "*.rc"
       - "*.vdf"
       - "*.pop"
+      - "*.lst"
   ice:
-    bin_path: "./bin/vice"
+    bin_path: "./bin/result/bin/vice"
     ice_key: "E2NcUkG2"
     filters:
     - "*.ctx"
