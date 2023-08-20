@@ -43,6 +43,8 @@ class Processor:
         if type(command) != list:
             command = [command]
 
+        command[0] = shutil.which(command[0])
+
         proc = subprocess.run(command + [file.obtain_real_file_path()], capture_output=True, **kwargs)
 
         # TODO: Proper Error handling
@@ -128,7 +130,7 @@ class ProtobufProcessor(Processor):
     def process_file(self, file: File):
         out_path = self.protobuf_dir.joinpath(file.path.stem)
         proc = subprocess.run(
-            [self.config["bin_path"], file.obtain_real_file_path(), out_path],
+            [shutil.which(self.config["bin_path"]), file.obtain_real_file_path(), out_path],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
