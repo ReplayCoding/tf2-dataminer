@@ -1,4 +1,4 @@
-from file import File
+from dataminer.file import File
 
 from pathlib import Path
 import subprocess

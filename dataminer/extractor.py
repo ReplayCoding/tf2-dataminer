@@ -1,4 +1,4 @@
-from file import File, VPKFile
+from dataminer.file import File, VPKFile
 
 import typing
 import vpk

@@ -1,6 +1,6 @@
-from file import File
-from processor import PROCESSORS, Processor
-from extractor import EXTRACTORS
+from dataminer.file import File
+from dataminer.processor import PROCESSORS, Processor
+from dataminer.extractor import EXTRACTORS
 
 from pathlib import Path
 from fnmatch import fnmatchcase
