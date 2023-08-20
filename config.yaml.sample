@@ -22,7 +22,7 @@ processors:
   #   filters:
   #     - "tf/bin/server_srv.so"
   convars:
-    bin_path: ./bin/cvdumper
+    bin_path: cvdumper
     filters:
       - "*.so"
   # protobufs:
@@ -45,7 +45,7 @@ processors:
       - "*.pop"
       - "*.lst"
   ice:
-    bin_path: "./bin/result/bin/vice"
+    bin_path: "vice"
     ice_key: "E2NcUkG2"
     filters:
     - "*.ctx"
