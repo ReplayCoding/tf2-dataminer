@@ -38,7 +38,7 @@ class Processor:
         pass
 
     def run_command_for_file(
-        self, command, file: File, output_suffix=".txt", **kwargs
+        self, command, file: File, output_suffix=".txt", no_processor_name = False, **kwargs
     ):
         if type(command) != list:
             command = [command]
@@ -50,7 +50,7 @@ class Processor:
         # TODO: Proper Error handling
         if proc.returncode == 0:
             with self.create_output_file_for(
-                file, output_suffix=output_suffix
+                file, output_suffix=output_suffix, no_processor_name=no_processor_name,
             ) as output:
                 output.write(proc.stdout)
         else:
@@ -58,14 +58,17 @@ class Processor:
             print(proc.stdout.decode("utf8"))
             print(proc.stderr.decode("utf8"))
 
-    def create_output_file_for(self, file: File, output_suffix=".txt"):
+    def create_output_file_for(self, file: File, output_suffix=".txt", no_processor_name=False):
         path = file.path
         final_dir = self.output_root.joinpath(
             path.parent.relative_to(file.input_root)
         )
         final_dir.mkdir(parents=True, exist_ok=True)
 
-        final_path: Path = final_dir.joinpath(f"{path.stem}_{self.name}{output_suffix}")
+        final_fname = f"{path.stem}_{self.name}{output_suffix}"
+        if no_processor_name:
+            final_fname = f"{path.stem}{output_suffix}"
+        final_path: Path = final_dir.joinpath(final_fname)
 
         self.add_artifact(file, final_path)
         return final_path.open("wb")
@@ -224,7 +227,7 @@ class IceProcessor(Processor):
     name = "ice"
 
     def process_file(self, file: File):
-        self.run_command_for_file([self.config["bin_path"], "-d", "-k", self.config["ice_key"]], file)
+        self.run_command_for_file([self.config["bin_path"], "-d", "-k", self.config["ice_key"]], file, no_processor_name=True)
 
 # Needs binja to work, and the analysis is non-deterministic currently anyways
 # import ctypes
