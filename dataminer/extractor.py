@@ -3,12 +3,14 @@ from dataminer.file import File, VPKFile
 import typing
 import vpk
 
+
 class Extractor:
     name: str
 
     @classmethod
     def get_files(cls, input_file: File) -> typing.Iterable[File]:
         return []
+
 
 class VpkExtractor(Extractor):
     name = "vpk"
@@ -31,12 +33,13 @@ class VpkExtractor(Extractor):
                 print("Couldn't read vpk:", e)
                 return []
 
-            vpk_relpath = input_file.obtain_real_file_path().relative_to(input_file.input_root)
+            vpk_relpath = input_file.obtain_real_file_path().relative_to(
+                input_file.input_root
+            )
 
-            yield VPKFile(vpkfile, vpk_relpath.parent.joinpath(vpk_relpath.stem).joinpath(path))
+            yield VPKFile(
+                vpkfile, vpk_relpath.parent.joinpath(vpk_relpath.stem).joinpath(path)
+            )
 
 
-EXTRACTORS: list[typing.Type[Extractor]] = [
-    VpkExtractor
-]
-
+EXTRACTORS: list[typing.Type[Extractor]] = [VpkExtractor]

@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 from dataminer.build import process_dir, load_config
 
+
 def run():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", required=True)

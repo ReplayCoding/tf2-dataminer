@@ -7,6 +7,7 @@ import shutil
 import bsp_tool
 import vpk
 
+
 class Processor:
     name: str
 
@@ -38,19 +39,28 @@ class Processor:
         pass
 
     def run_command_for_file(
-        self, command, file: File, output_suffix=".txt", no_processor_name = False, **kwargs
+        self,
+        command,
+        file: File,
+        output_suffix=".txt",
+        no_processor_name=False,
+        **kwargs,
     ):
         if type(command) != list:
             command = [command]
 
         command[0] = shutil.which(command[0])
 
-        proc = subprocess.run(command + [file.obtain_real_file_path()], capture_output=True, **kwargs)
+        proc = subprocess.run(
+            command + [file.obtain_real_file_path()], capture_output=True, **kwargs
+        )
 
         # TODO: Proper Error handling
         if proc.returncode == 0:
             with self.create_output_file_for(
-                file, output_suffix=output_suffix, no_processor_name=no_processor_name,
+                file,
+                output_suffix=output_suffix,
+                no_processor_name=no_processor_name,
             ) as output:
                 output.write(proc.stdout)
         else:
@@ -58,11 +68,11 @@ class Processor:
             print(proc.stdout.decode("utf8"))
             print(proc.stderr.decode("utf8"))
 
-    def create_output_file_for(self, file: File, output_suffix=".txt", no_processor_name=False):
+    def create_output_file_for(
+        self, file: File, output_suffix=".txt", no_processor_name=False
+    ):
         path = file.path
-        final_dir = self.output_root.joinpath(
-            path.parent.relative_to(file.input_root)
-        )
+        final_dir = self.output_root.joinpath(path.parent.relative_to(file.input_root))
         final_dir.mkdir(parents=True, exist_ok=True)
 
         final_fname = f"{path.stem}_{self.name}{output_suffix}"
@@ -92,16 +102,20 @@ class SymbolsProcessor(Processor):
     name = "symbols"
 
     def process_file(self, file: File):
-        proc = subprocess.run(["nm", "--just-symbol-name", file.obtain_real_file_path()], capture_output=True)
+        proc = subprocess.run(
+            ["nm", "--just-symbol-name", file.obtain_real_file_path()],
+            capture_output=True,
+        )
 
         # TODO: Proper Error handling
         if proc.returncode == 0:
-            with self.create_output_file_for(
-                file, output_suffix=".txt"
-            ) as output:
+            with self.create_output_file_for(file, output_suffix=".txt") as output:
                 for line in proc.stdout.decode("utf8").split("\n"):
                     line = line.strip()
-                    if not (line.startswith("GCC_except_table") or line.startswith("__GLOBAL__")):
+                    if not (
+                        line.startswith("GCC_except_table")
+                        or line.startswith("__GLOBAL__")
+                    ):
                         output.write((line + "\n").encode("utf8"))
         else:
             print("ERROR:", file.path, proc.returncode, self.name)
@@ -113,7 +127,7 @@ class NetvarProcessor(Processor):
     name = "netvars"
 
     def process_file(self, file: File):
-        assert(file.is_real)
+        assert file.is_real
 
         path = file.path
         env = {
@@ -122,11 +136,12 @@ class NetvarProcessor(Processor):
 
         self.run_command_for_file(self.config["bin_path"], file, env=env)
 
+
 class ConvarProcessor(Processor):
     name = "convars"
 
     def process_file(self, file: File):
-        assert(file.is_real)
+        assert file.is_real
 
         path = file.path
         env = {
@@ -147,7 +162,11 @@ class ProtobufProcessor(Processor):
     def process_file(self, file: File):
         out_path = self.protobuf_dir.joinpath(file.path.stem)
         proc = subprocess.run(
-            [shutil.which(self.config["bin_path"]), file.obtain_real_file_path(), out_path],
+            [
+                shutil.which(self.config["bin_path"]),
+                file.obtain_real_file_path(),
+                out_path,
+            ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
@@ -164,12 +183,11 @@ class BspProcessor(Processor):
     name = "bsp"
 
     def process_file(self, file: File):
-        bsp = bsp_tool.load_bsp(file.obtain_real_file_path().as_posix(), bsp_tool.branches.valve.orange_box)
+        bsp = bsp_tool.load_bsp(
+            file.obtain_real_file_path().as_posix(), bsp_tool.branches.valve.orange_box
+        )
 
-        output = [
-            f"BSP Version: {bsp.bsp_version}",
-            f"Revision: {bsp.revision}"
-        ]
+        output = [f"BSP Version: {bsp.bsp_version}", f"Revision: {bsp.revision}"]
 
         for lump in bsp.branch.LUMP:
             lump = lump.name
@@ -186,7 +204,9 @@ class BspProcessor(Processor):
             #     crc = "{:08x}".format(zlib.crc32(lump_content))
             # except Exception as e:
             #     pass
-            output.append(f"{lump} (v{lump_header.version}): size = {lump_header.length}")
+            output.append(
+                f"{lump} (v{lump_header.version}): size = {lump_header.length}"
+            )
 
         with self.create_output_file_for(file) as fd:
             fd.write("\n".join(output).encode("utf8"))
@@ -196,7 +216,7 @@ class VpkProcessor(Processor):
     name = "vpk"
 
     def process_file(self, file: File):
-        assert(file.is_real)
+        assert file.is_real
 
         pak = vpk.open(file.path)
 
@@ -209,25 +229,30 @@ class VpkProcessor(Processor):
                 line = "{} {:08x} {}\n".format(name, crc, size)
                 fd.write(line.encode("utf8"))
 
+
 class CopyProcessor(Processor):
     name = "copy"
 
     def process_file(self, file: File):
         path = file.path
-        final_dir = self.output_root.joinpath(
-            path.parent.relative_to(file.input_root)
-        )
+        final_dir = self.output_root.joinpath(path.parent.relative_to(file.input_root))
         final_dir.mkdir(parents=True, exist_ok=True)
 
         output_file = final_dir.joinpath(file.path.name)
         self.add_artifact(file, output_file)
         shutil.copyfile(file.obtain_real_file_path(), output_file)
 
+
 class IceProcessor(Processor):
     name = "ice"
 
     def process_file(self, file: File):
-        self.run_command_for_file([self.config["bin_path"], "-d", "-k", self.config["ice_key"]], file, no_processor_name=True)
+        self.run_command_for_file(
+            [self.config["bin_path"], "-d", "-k", self.config["ice_key"]],
+            file,
+            no_processor_name=True,
+        )
+
 
 # Needs binja to work, and the analysis is non-deterministic currently anyways
 # import ctypes
