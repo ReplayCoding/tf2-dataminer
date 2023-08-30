@@ -234,13 +234,48 @@ class CopyProcessor(Processor):
     name = "copy"
 
     def process_file(self, file: File):
+        do_raw_copy = True
+
         path = file.path
         final_dir = self.output_root.joinpath(path.parent.relative_to(file.input_root))
         final_dir.mkdir(parents=True, exist_ok=True)
 
         output_file = final_dir.joinpath(file.path.name)
         self.add_artifact(file, output_file)
-        shutil.copyfile(file.obtain_real_file_path(), output_file)
+        if self.config["convert_utf8"]:
+            do_raw_copy = False
+            with open(file.obtain_real_file_path(), "rb") as inp_fd, output_file.open(
+                "wb"
+            ) as out_fd:
+                bom = inp_fd.read(4)
+                output_encoding = "utf-8"
+                # Number of unused bytes from the BOM, since we always read 4 bytes.
+                n_copy_back = 0
+
+                # Default assumed encoding is utf-8
+                encoding = "utf-8"
+                if bom[0:4] == b"\x00\x00\xFE\xFF":
+                    encoding = "utf-32be"
+                elif bom[0:4] == b"\xFF\xFE\x00\x00":
+                    encoding = "utf-32le"
+                elif bom[0:2] == b"\xFE\xFF":
+                    encoding = "utf-16be"
+                    n_copy_back = 2
+                elif bom[0:2] == b"\xFF\xFE":
+                    encoding = "utf-16le"
+                    n_copy_back = 2
+
+                data = bom[-n_copy_back:] + inp_fd.read()
+
+                # If decode fails, just copy the file
+                try:
+                    decoded = data.decode(encoding)
+                    out_fd.write(decoded.encode(output_encoding))
+                except:
+                    do_raw_copy = True
+
+        if do_raw_copy:
+            shutil.copyfile(file.obtain_real_file_path(), output_file)
 
 
 class IceProcessor(Processor):

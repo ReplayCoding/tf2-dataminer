@@ -22,6 +22,7 @@ processors:
     filters:
       - "*_dir.vpk"
   - name: copy
+    convert_utf8: true
     filters:
       - "*.cfg"
       - "*.txt"
