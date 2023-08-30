@@ -3,39 +3,25 @@ extractors:
     filters:
       - "*_dir.vpk"
 processors:
-  # vtables:
-  #   bin_path: ./bin/vtable_dumper
-  #   filters:
-  #   - "*.dylib"
-  strings:
+  - name: symbols
     filters:
-    - "*.dylib"
-    - "hl2_osx"
-    # - "srcds_linux"
-  symbols:
+      - "*.dylib"
+  # You can have multiple of the same processor, with different settings
+  - name: symbols
     filters:
-    - "*.dylib"
-    - "hl2_osx"
-    # - "srcds_linux"
-  # netvars:
-  #   bin_path: ./bin/nvdumper
-  #   filters:
-  #     - "tf/bin/server_srv.so"
-  convars:
+      - "hl2_osx"
+
+  - name: convars
     bin_path: cvdumper
     filters:
       - "*.so"
-  # protobufs:
-  #   bin_path: "./bin/ProtobufDumper"
+  # - name: bsp
   #   filters:
-  #     - "*.dylib"
-  bsp:
-    filters:
-      - "*.bsp"
-  vpk:
+  #     - "*.bsp"
+  - name: vpk
     filters:
       - "*_dir.vpk"
-  copy:
+  - name: copy
     filters:
       - "*.cfg"
       - "*.txt"
@@ -44,11 +30,9 @@ processors:
       - "*.vdf"
       - "*.pop"
       - "*.lst"
-  ice:
+      - "*.inf"
+  - name: ice
     bin_path: "vice"
     ice_key: "E2NcUkG2"
     filters:
     - "*.ctx"
-  # binexport:
-  #   filters:
-  #     - "*.so"

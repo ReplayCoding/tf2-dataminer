@@ -24,11 +24,13 @@ def process_dir(input_path: Path, output_path: Path):
 
     instantiated_processors: list[Processor] = []
 
+    proc_dict = {}
     for proc in PROCESSORS:
-        if not (proc.name in CONFIG["processors"]):
-            continue
+        proc_dict[proc.name] = proc
 
-        proc = proc(output_root, CONFIG["processors"][proc.name])
+    for proc_config in CONFIG["processors"]:
+        name = proc_config["name"]
+        proc = proc_dict[name](output_root, proc_config)
 
         proc.pre_process()
         instantiated_processors.append(proc)
@@ -41,7 +43,13 @@ def process_dir(input_path: Path, output_path: Path):
             for pat in pats:
                 if fnmatchcase(path_to_match, pat):
                     # print(path_to_match, pat, proc.name)
-                    proc.run_processor(file_info)
+                    try:
+                        proc.run_processor(file_info)
+                    except Exception as e:
+                        print(
+                            f'ERROR while running processor "{proc.name}" on file "{file_info.path}"'
+                        )
+                        raise e
 
     for root, _, files in os.walk(input_path):
         for path in files:
