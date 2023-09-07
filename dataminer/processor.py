@@ -102,25 +102,7 @@ class SymbolsProcessor(Processor):
     name = "symbols"
 
     def process_file(self, file: File):
-        proc = subprocess.run(
-            ["nm", "--just-symbol-name", file.obtain_real_file_path()],
-            capture_output=True,
-        )
-
-        # TODO: Proper Error handling
-        if proc.returncode == 0:
-            with self.create_output_file_for(file, output_suffix=".txt") as output:
-                for line in proc.stdout.decode("utf8").split("\n"):
-                    line = line.strip()
-                    if not (
-                        line.startswith("GCC_except_table")
-                        or line.startswith("__GLOBAL__")
-                    ):
-                        output.write((line + "\n").encode("utf8"))
-        else:
-            print("ERROR:", file.path, proc.returncode, self.name)
-            print(proc.stdout.decode("utf8"))
-            print(proc.stderr.decode("utf8"))
+        self.run_command_for_file(["nm", "--just-symbol-name"], file)
 
 
 class NetvarProcessor(Processor):
