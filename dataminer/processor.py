@@ -11,25 +11,15 @@ import vpk
 class Processor:
     name: str
 
-    artifact_mappings: dict[Path, list[Path]]
     config: dict[str, str]
 
     def __init__(self, output_root: Path, config: dict[str, str]):
         self.output_root = output_root
-        self.artifact_mappings = {}
         self.config = config
 
     # Public interface to process_file
     def run_processor(self, file: File):
         self.process_file(file)
-
-    def add_artifact(self, parent: File, artifact: Path):
-        # print(f"Adding artifact for {parent.path} ({artifact})")
-
-        if not (parent.path in self.artifact_mappings):
-            self.artifact_mappings[parent.path] = []
-
-        self.artifact_mappings[parent.path].append(artifact)
 
     # TODO: Maybe rename this?
     def pre_process(self):
@@ -80,7 +70,6 @@ class Processor:
             final_fname = f"{path.stem}{output_suffix}"
         final_path: Path = final_dir.joinpath(final_fname)
 
-        self.add_artifact(file, final_path)
         return final_path.open("wb")
 
 
@@ -156,9 +145,6 @@ class ProtobufProcessor(Processor):
         # TODO: Proper Error handling
         if proc.returncode != 0:
             print("ERROR:", file, proc.returncode, self.name)
-        else:
-            if out_path.exists():
-                self.add_artifact(file, out_path)
 
 
 class BspProcessor(Processor):
@@ -223,7 +209,6 @@ class CopyProcessor(Processor):
         final_dir.mkdir(parents=True, exist_ok=True)
 
         output_file = final_dir.joinpath(file.path.name)
-        self.add_artifact(file, output_file)
         if self.config["convert_utf8"]:
             do_raw_copy = False
             with open(file.obtain_real_file_path(), "rb") as inp_fd, output_file.open(
@@ -271,29 +256,6 @@ class IceProcessor(Processor):
         )
 
 
-# Needs binja to work, and the analysis is non-deterministic currently anyways
-# import ctypes
-# from binaryninja import open_view
-#
-# class BinexportProcessor(Processor):
-#     name = "binexport"
-#     binexport_mod = ctypes.CDLL("binexport12_binaryninja.so")
-#
-#     def process_file(self, file: File):
-#
-#         options = { "analysis.mode": "basic" } # Is this enough?
-#         with open_view(file.obtain_real_file_path().as_posix(), options = options) as view:
-#             # TODO: Merge with copy processor code & create_output_file_for
-#             path = file.path
-#             final_dir = self.output_root.joinpath(
-#                 path.parent.relative_to(file.input_root)
-#             )
-#             final_dir.mkdir(parents=True, exist_ok=True)
-#             out_path = final_dir.joinpath(f"{file.path.stem}.BinExport")
-#
-#             self.add_artifact(file, out_path)
-#             self.binexport_mod.BEExportFile(out_path.as_posix().encode("ascii"), view.handle)
-
 PROCESSORS: list[typing.Type[Processor]] = [
     CopyProcessor,
     NetvarProcessor,
@@ -305,5 +267,4 @@ PROCESSORS: list[typing.Type[Processor]] = [
     BspProcessor,
     VpkProcessor,
     IceProcessor,
-    # BinexportProcessor,
 ]
