@@ -188,7 +188,7 @@ class VpkProcessor(Processor):
 
         pak = vpk.open(file.path)
 
-        with self.create_output_file_for(file) as fd:
+        with self.create_output_file_for(file, no_processor_name=True) as fd:
             for name, meta in pak.read_index_iter():
                 # WTF
                 crc = meta[1]
