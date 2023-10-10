@@ -1,6 +1,7 @@
 from dataminer.file import File
 
 from pathlib import Path
+import re
 import subprocess
 import typing
 import shutil
@@ -52,7 +53,14 @@ class Processor:
                 output_suffix=output_suffix,
                 no_processor_name=no_processor_name,
             ) as output:
-                output.write(proc.stdout)
+                if "line_discard_filter" in self.config:
+                    r = re.compile(self.config["line_discard_filter"])
+                    for line in proc.stdout.decode("utf8").split("\n"):
+                        line = line.strip()
+                        if r.search(line) == None:
+                            output.write((line + "\n").encode("utf8"))
+                else:
+                    output.write(proc.stdout)
         else:
             print("ERROR:", file.path, proc.returncode, self.name)
             print(proc.stdout.decode("utf8"))
