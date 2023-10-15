@@ -7,7 +7,6 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-bsp-tool = "^0.4.0"
 PyYAML = "^6.0.1"
 vpk = "^1.4.0"
 

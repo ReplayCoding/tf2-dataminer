@@ -5,7 +5,6 @@ import re
 import subprocess
 import typing
 import shutil
-import bsp_tool
 import vpk
 
 
@@ -159,34 +158,7 @@ class BspProcessor(Processor):
     name = "bsp"
 
     def process_file(self, file: File):
-        bsp = bsp_tool.load_bsp(
-            file.obtain_real_file_path().as_posix(), bsp_tool.branches.valve.orange_box
-        )
-
-        output = [f"BSP Version: {bsp.bsp_version}", f"Revision: {bsp.revision}"]
-
-        for lump in bsp.branch.LUMP:
-            lump = lump.name
-            if lump not in bsp.headers:
-                continue
-
-            lump_header = bsp.headers[lump]
-
-            # BSP info extraction already takes quite a while, this takes even more time :(
-            # Maybe multiprocess/thread processors?
-            # crc = "error"
-            # try:
-            #     lump_content = bsp.lump_as_bytes(lump)
-            #     crc = "{:08x}".format(zlib.crc32(lump_content))
-            # except Exception as e:
-            #     pass
-            output.append(
-                f"{lump} (v{lump_header.version}): size = {lump_header.length}"
-            )
-
-        with self.create_output_file_for(file) as fd:
-            fd.write("\n".join(output).encode("utf8"))
-
+        self.run_command_for_file("bspinfo", file, no_processor_name=False)
 
 class VpkProcessor(Processor):
     name = "vpk"
