@@ -6,6 +6,7 @@ from pathlib import Path
 from fnmatch import fnmatchcase
 import os
 import yaml
+import time
 
 CONFIG = {}
 
@@ -30,6 +31,7 @@ def process_dir(input_path: Path, output_path: Path):
 
     instantiated_processors: list[Processor] = []
 
+    proc_timings = {}
     proc_dict = {}
     for proc in PROCESSORS:
         proc_dict[proc.name] = proc
@@ -48,6 +50,7 @@ def process_dir(input_path: Path, output_path: Path):
             pats = proc.config["filters"]
             if filter_match(path_to_match, pats):
                 # print(path_to_match, pat, proc.name)
+                start_time = time.time()
                 try:
                     proc.run_processor(file_info)
                 except Exception as e:
@@ -55,6 +58,8 @@ def process_dir(input_path: Path, output_path: Path):
                         f'ERROR while running processor "{proc.name}" on file "{file_info.path}"'
                     )
                     raise e
+                final_time = time.time() - start_time
+                proc_timings[proc.name] = proc_timings.get(proc.name, 0) + final_time
 
     for root, _, files in os.walk(input_path):
         for path in files:
@@ -75,3 +80,7 @@ def process_dir(input_path: Path, output_path: Path):
                     # print(path_to_match, pat, ex.name)
                     for f in ex.get_files(file_info):
                         run_processors_on_file(f)
+
+    print("TIMINGS:")
+    for (name, timing) in proc_timings.items():
+        print(f"{name}: {timing}")
