@@ -1,7 +1,9 @@
-from dataminer.file import File, VPKFile
+from os import walk
+from dataminer.file import BSPPakFile, File, VPKFile
 
 import typing
 import vpk
+import zipfile
 
 
 class Extractor:
@@ -41,5 +43,25 @@ class VpkExtractor(Extractor):
                 vpkfile, vpk_relpath.parent.joinpath(vpk_relpath.stem).joinpath(path)
             )
 
+class BspExtractor(Extractor):
+    name = "bsp"
 
-EXTRACTORS: list[typing.Type[Extractor]] = [VpkExtractor]
+    @classmethod
+    def get_files(cls, input_file: File):
+        bsp = None
+
+        try:
+            bsp = zipfile.ZipFile(input_file.obtain_real_file_path())
+        except Exception as e:
+            print("Couldn't open bsp (probably no pakfile):", e)
+            return []
+
+        for info in bsp.infolist():
+            f = bsp.open(info)
+
+            extracted_relpath = input_file.obtain_real_file_path().relative_to(input_file.input_root)
+
+            yield BSPPakFile(f, info.file_size, extracted_relpath.parent.joinpath(extracted_relpath.stem).joinpath(info.filename))
+
+
+EXTRACTORS: list[typing.Type[Extractor]] = [VpkExtractor, BspExtractor]

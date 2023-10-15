@@ -1,4 +1,5 @@
 import vpk
+import zipfile
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
@@ -44,6 +45,36 @@ class VPKFile(File):
         )
 
         self.backing_file.truncate(self.file.length)
+
+        for chunk in iter(lambda: self.file.read(8192), b""):
+            self.backing_file.write(chunk)
+
+        self.backing_file.flush()
+
+        return Path(self.backing_file.name)
+
+class BSPPakFile(File):
+    input_root = Path("/")
+
+    def __init__(self, file, size: int, path: Path):
+        self.file = file
+        self.path = self.input_root.joinpath(path)
+        self.backing_file = None
+        self.file_size = size
+
+    @property
+    def is_real(self):
+        return False
+
+    def obtain_real_file_path(self) -> Path:
+        if self.backing_file is not None:
+            return Path(self.backing_file.name)
+
+        self.backing_file = NamedTemporaryFile(
+            "w+b", suffix=self.path.suffix, prefix=self.path.stem
+        )
+
+        self.backing_file.truncate(self.file_size)
 
         for chunk in iter(lambda: self.file.read(8192), b""):
             self.backing_file.write(chunk)
