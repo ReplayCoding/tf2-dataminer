@@ -2,22 +2,27 @@ extractors:
   vpk:
     filters:
       - "*_dir.vpk"
+  bsp:
+    filters:
+      - "*.bsp"
 processors:
-  - name: symbols
+  - name: strings
+    line_discard_filter: 'protobuf|GCC_except_table|osx-builder\.'
     filters:
       - "*.dylib"
-  # You can have multiple of the same processor, with different settings
-  - name: symbols
-    filters:
       - "hl2_osx"
-
+  - name: symbols
+    line_discard_filter: 'GCC_except_table|google::protobuf'
+    filters:
+      - "*.dylib"
+      - "hl2_osx"
   - name: convars
     bin_path: cvdumper
     filters:
       - "*.so"
-  # - name: bsp
-  #   filters:
-  #     - "*.bsp"
+  - name: bsp
+    filters:
+      - "*.bsp"
   - name: vpk
     filters:
       - "*_dir.vpk"
@@ -32,6 +37,8 @@ processors:
       - "*.pop"
       - "*.lst"
       - "*.inf"
+      - "*.vmt"
+      - "*.nut"
   - name: ice
     bin_path: "vice"
     ice_key: "E2NcUkG2"
