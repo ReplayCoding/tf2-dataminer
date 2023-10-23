@@ -34,6 +34,7 @@ class Processor:
         file: File,
         output_suffix=".txt",
         no_processor_name=False,
+        replace_processor_name=None,
         **kwargs,
     ):
         if type(command) != list:
@@ -51,6 +52,7 @@ class Processor:
                 file,
                 output_suffix=output_suffix,
                 no_processor_name=no_processor_name,
+                replace_processor_name=replace_processor_name,
             ) as output:
                 if "line_discard_filter" in self.config:
                     r = re.compile(self.config["line_discard_filter"])
@@ -66,13 +68,14 @@ class Processor:
             print(proc.stderr.decode("utf8"))
 
     def create_output_file_for(
-        self, file: File, output_suffix=".txt", no_processor_name=False
+        self, file: File, output_suffix=".txt",
+        no_processor_name=False, replace_processor_name=None,
     ):
         path = file.path
         final_dir = self.output_root.joinpath(path.parent.relative_to(file.input_root))
         final_dir.mkdir(parents=True, exist_ok=True)
 
-        final_fname = f"{path.stem}_{self.name}{output_suffix}"
+        final_fname = f"{path.stem}_{replace_processor_name or self.name}{output_suffix}"
         if no_processor_name:
             final_fname = f"{path.stem}{output_suffix}"
         final_path: Path = final_dir.joinpath(final_fname)
@@ -154,11 +157,17 @@ class ProtobufProcessor(Processor):
             print("ERROR:", file, proc.returncode, self.name)
 
 
-class BspProcessor(Processor):
-    name = "bsp"
+class BspEntitiesProcessor(Processor):
+    name = "bsp_entities"
 
     def process_file(self, file: File):
-        self.run_command_for_file("bspinfo", file, no_processor_name=False)
+        self.run_command_for_file(["bspinfo", "entities"], file, replace_processor_name="entities")
+
+class BspFileListingProcessor(Processor):
+    name = "bsp_listing"
+
+    def process_file(self, file: File):
+        self.run_command_for_file(["bspinfo", "files"], file, replace_processor_name="listing")
 
 class VpkProcessor(Processor):
     name = "vpk"
@@ -251,7 +260,8 @@ PROCESSORS: list[typing.Type[Processor]] = [
     StringProcessor,
     SymbolsProcessor,
     ProtobufProcessor,
-    BspProcessor,
+    BspEntitiesProcessor,
+    BspFileListingProcessor,
     VpkProcessor,
     IceProcessor,
 ]
