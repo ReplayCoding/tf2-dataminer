@@ -349,7 +349,7 @@ class VPK(object):
         path = self.vpk_path
 
         if metadata['archive_index'] != 0x7fff:
-            path = path.replace('english','').replace("dir.", "%03d." % metadata['archive_index'])
+            path = path.replace("dir.", "%03d." % metadata['archive_index'])
 
         return path
 
