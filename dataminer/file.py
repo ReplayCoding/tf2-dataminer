@@ -1,4 +1,4 @@
-import vpk
+from dataminer import vpk
 import zipfile
 from pathlib import Path
 from tempfile import NamedTemporaryFile

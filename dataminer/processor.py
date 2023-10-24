@@ -5,7 +5,7 @@ import re
 import subprocess
 import typing
 import shutil
-import vpk
+from dataminer import vpk
 
 
 class Processor:

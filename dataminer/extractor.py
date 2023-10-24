@@ -1,8 +1,8 @@
 from os import walk
 from dataminer.file import BSPPakFile, File, VPKFile
+from dataminer import vpk
 
 import typing
-import vpk
 import zipfile
 
 
