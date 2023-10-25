@@ -205,11 +205,13 @@ class CopyProcessor(Processor):
         final_dir.mkdir(parents=True, exist_ok=True)
 
         output_file = final_dir.joinpath(file.path.name)
-        if self.config["convert_utf8"]:
-            do_raw_copy = False
-            with open(file.obtain_real_file_path(), "rb") as inp_fd, output_file.open(
-                "wb"
-            ) as out_fd:
+        
+        with file.open() as inp_fd, output_file.open(
+            "wb"
+        ) as out_fd:
+            if self.config["convert_utf8"]:
+                do_raw_copy = False
+
                 bom = inp_fd.read(4)
                 output_encoding = "utf-8"
                 # Number of unused bytes from the BOM, since we always read 4 bytes.
@@ -230,15 +232,19 @@ class CopyProcessor(Processor):
 
                 data = bom[-n_copy_back:] + inp_fd.read()
 
-                # If decode fails, just copy the file
+                # If decode fails, fallback to raw copy
                 try:
                     decoded = data.decode(encoding)
                     out_fd.write(decoded.encode(output_encoding))
                 except:
                     do_raw_copy = True
 
-        if do_raw_copy:
-            shutil.copyfile(file.obtain_real_file_path(), output_file)
+            if do_raw_copy:
+                inp_fd.seek(0)
+                out_fd.seek(0)
+                out_fd.truncate(0)
+
+                shutil.copyfileobj(inp_fd, out_fd)
 
 
 class IceProcessor(Processor):

@@ -1,5 +1,4 @@
 from dataminer import vpk
-import zipfile
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
@@ -15,6 +14,9 @@ class File:
     @property
     def is_real(self):
         return True
+
+    def open(self):
+        return open(self.obtain_real_file_path(), "rb")
 
     # Maybe rename this... Files in vpks won't have paths that correspond to real paths on the system.
     def obtain_real_file_path(self) -> Path:
@@ -36,7 +38,12 @@ class VPKFile(File):
     def is_real(self):
         return False
 
+    def open(self):
+        return self.file
+
     def obtain_real_file_path(self) -> Path:
+        print(f"file in VPK will be extracted to temp dir, this is not good! (file {self.path})")
+
         if self.backing_file is not None:
             return Path(self.backing_file.name)
 
