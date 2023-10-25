@@ -42,7 +42,7 @@ class VPKFile(File):
         return self.file
 
     def obtain_real_file_path(self) -> Path:
-        print(f"file in VPK will be extracted to temp dir, this is not good! (file {self.path})")
+        # print(f"file in VPK will be extracted to temp dir, this is not good! (file {self.path})")
 
         if self.backing_file is not None:
             return Path(self.backing_file.name)
